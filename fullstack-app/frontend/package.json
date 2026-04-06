@@ -1,0 +1,11 @@
+{
+  "name": "frontend",
+  "version": "1.0.0",
+  "scripts": {
+    "start": "serve -s build",
+    "build": "echo building && mkdir build && echo '<h1>🔥 React App Running</h1>' > build/index.html"
+  },
+  "dependencies": {
+    "serve": "^14.2.0"
+  }
+}
