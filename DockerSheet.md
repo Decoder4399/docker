@@ -1,287 +1,347 @@
-# 🚀 DOCKER MULTI-STACK CHEAT SHEET (DEVOPS NOTES)
+# 🚀 Docker Multi-Stack Cheat Sheet (DevOps Notes)
+
+A quick reference for containerizing different tech stacks using Docker.
 
 ---
 
-# 🧠 UNIVERSAL DOCKER LOGIC
+## 🧠 Universal Docker Workflow
 
-Every Dockerfile has 4 steps:
+Every Dockerfile follows these steps:
 
-1. Base Image
-2. Dependency Install
-3. Build Step (if required)
-4. Run Command (CMD)
+1. **Base Image**
+2. **Install Dependencies**
+3. **Build (if required)**
+4. **Run Command (CMD)**
 
 ---
 
-# 🧩 1. NODE.JS (Express)
+## 🧩 1. Node.js (Express)
 
-## Base Image
+### Base Image
 
+```dockerfile
 FROM node:18-alpine
+```
 
-## Steps
+### Steps
 
+```dockerfile
 WORKDIR /app
 COPY package.json .
 RUN npm install
 COPY . .
+```
 
-## Run
+### Run
 
+```dockerfile
 CMD ["npm", "start"]
+```
 
-## Notes
+### Notes
 
 * No build required
-* Default ports: 3000 / 5000
+* Common ports: `3000`, `5000`
 
 ---
 
-# 🧩 2. PYTHON (Flask / FastAPI)
+## 🧩 2. Python (Flask / FastAPI)
 
-## Base Image
+### Base Image
 
+```dockerfile
 FROM python:3.10-slim
+```
 
-## Steps
+### Steps
 
+```dockerfile
 WORKDIR /app
 COPY requirements.txt .
 RUN pip install -r requirements.txt
 COPY . .
+```
 
-## Run
+### Run
 
-### Flask
+#### Flask
 
+```dockerfile
 CMD ["python", "app.py"]
+```
 
-### FastAPI
+#### FastAPI
 
+```dockerfile
 CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
+```
 
-## Notes
+### Notes
 
-* FastAPI requires uvicorn
+* FastAPI requires `uvicorn`
 * No build step
 
 ---
 
-# 🧩 3. JAVA (Spring Boot)
+## 🧩 3. Java (Spring Boot)
 
-## Base Image
+### Base Image
 
+```dockerfile
 FROM maven:3.9.6-eclipse-temurin-17
+```
 
-## Steps
+### Steps
 
+```dockerfile
 WORKDIR /app
 COPY . .
 RUN mvn clean package -DskipTests
+```
 
-## Run
+### Run
 
+```dockerfile
 CMD ["java", "-jar", "target/app.jar"]
+```
 
-## Notes
+### Notes
 
-* Build step required
-* JAR file must match name
+* Build required
+* Ensure correct JAR name
 
 ---
 
-# 🧩 4. GO (Golang)
+## 🧩 4. Go (Golang)
 
-## Base Image
+### Base Image
 
+```dockerfile
 FROM golang:1.21
+```
 
-## Steps
+### Steps
 
+```dockerfile
 WORKDIR /app
 COPY . .
 RUN go build -o app main.go
+```
 
-## Run
+### Run
 
+```dockerfile
 CMD ["./app"]
+```
 
-## Notes
+### Notes
 
-* Compiled language
-* Binary generated
+* Compiled binary
+* Fast and lightweight
 
 ---
 
-# 🧩 5. PHP (Apache)
+## 🧩 5. PHP (Apache)
 
-## Base Image
+### Base Image
 
+```dockerfile
 FROM php:8.2-apache
+```
 
-## Steps
+### Steps
 
+```dockerfile
 WORKDIR /var/www/html
 COPY . .
+```
 
-## MySQL Support
+### MySQL Support
 
+```dockerfile
 RUN docker-php-ext-install mysqli
+```
 
-## Run
+### Run
 
-(No CMD needed — Apache auto runs)
+* No CMD required (Apache runs automatically)
 
-## Notes
+### Notes
 
-* Default port: 80
+* Default port: `80`
 
 ---
 
-# 🧩 6. REACT (Frontend)
+## 🧩 6. React (Frontend)
 
-## Base Image (Build)
+### Build Stage
 
+```dockerfile
 FROM node:18
-
-## Steps
 
 WORKDIR /app
 COPY package.json .
 RUN npm install
 COPY . .
 RUN npm run build
+```
 
-## Serve (NGINX)
+### Serve with NGINX
 
+```dockerfile
 FROM nginx:alpine
 COPY build /usr/share/nginx/html
+```
 
-## Notes
+### Notes
 
 * Build required
-* Static output
+* Outputs static files
 
 ---
 
-# 🧩 7. STATIC HTML
+## 🧩 7. Static HTML
 
-## Base Image
+### Base Image
 
+```dockerfile
 FROM nginx:alpine
+```
 
-## Steps
+### Steps
 
+```dockerfile
 COPY index.html /usr/share/nginx/html/index.html
+```
 
-## Notes
+### Notes
 
-* Simplest Docker setup
+* Simplest setup
 
 ---
 
-# 🧩 8. .NET CORE
+## 🧩 8. .NET Core
 
-## Base Image
+### Base Image
 
+```dockerfile
 FROM mcr.microsoft.com/dotnet/sdk:7.0
+```
 
-## Steps
+### Steps
 
+```dockerfile
 WORKDIR /app
 COPY . .
 RUN dotnet build
+```
 
-## Run
+### Run
 
+```dockerfile
 CMD ["dotnet", "run"]
+```
 
-## Notes
+### Notes
 
 * Build required
 
 ---
 
-# 🧩 9. DATABASE SERVICES (NO DOCKERFILE)
+## 🧩 9. Database Services (No Dockerfile Needed)
 
-## MongoDB
+### MongoDB
 
+```yaml
 image: mongo
+```
 
-## MySQL
+### MySQL
 
+```yaml
 image: mysql:8
 environment:
-MYSQL_ROOT_PASSWORD: root
+  MYSQL_ROOT_PASSWORD: root
+```
 
-## Redis
+### Redis
 
+```yaml
 image: redis
+```
 
 ---
 
-# 🔥 GOLDEN RULES
+## 🔥 Golden Rules
 
-## Rule 1 — Service Name = Hostname
+### 1. Service Name = Hostname
 
+```bash
 mongodb://mongo:27017
 redis://redis:6379
+```
 
 ---
 
-## Rule 2 — COPY Optimization
+### 2. Optimize COPY Layers
 
+```dockerfile
 COPY package.json .
 RUN npm install
 COPY . .
+```
 
 ---
 
-## Rule 3 — EXPOSE vs PORTS
+### 3. EXPOSE vs PORTS
 
-EXPOSE → internal
-ports → external
-
----
-
-## Rule 4 — Build vs No Build
-
-Node → ❌
-Python → ❌
-Java → ✅
-Go → ✅
-React → ✅
-.NET → ✅
+| Concept | Meaning                 |
+| ------- | ----------------------- |
+| EXPOSE  | Internal container port |
+| ports   | External host mapping   |
 
 ---
 
-# 💪 FINAL SUMMARY
+### 4. Build Requirements
 
-Node → node → npm start
-Python → python → python / uvicorn
-Java → maven → java -jar
-Go → golang → ./binary
-PHP → php-apache → auto
-React → node/nginx → nginx
-.NET → dotnet → dotnet run
+| Stack  | Build Required |
+| ------ | -------------- |
+| Node   | ❌              |
+| Python | ❌              |
+| Java   | ✅              |
+| Go     | ✅              |
+| React  | ✅              |
+| .NET   | ✅              |
 
 ---
 
-# 🚀 PRACTICE FLOW
+## 💪 Summary
+
+| Stack  | Base Image | Run Command      |
+| ------ | ---------- | ---------------- |
+| Node   | node       | npm start        |
+| Python | python     | python / uvicorn |
+| Java   | maven      | java -jar        |
+| Go     | golang     | ./binary         |
+| PHP    | php-apache | auto             |
+| React  | node/nginx | nginx            |
+| .NET   | dotnet     | dotnet run       |
+
+---
+
+## 🚀 Practice Workflow
 
 1. Run project locally
 2. Write Dockerfile
-3. Write docker-compose
+3. Add docker-compose
 4. Debug errors
 
 ---
 
-# 😎 GOAL
+## 🎯 Goal
 
-Become:
-
-* Multi-stack Docker expert
-* Confident in debugging
-* Ready for real DevOps work
+* Become multi-stack Docker expert
+* Master debugging
+* Build production-ready setups
 
 ---
